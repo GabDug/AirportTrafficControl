@@ -6,21 +6,7 @@
 #include "QueueArray.h"
 #include <stdlib.h>
 #include <string.h>
-
-
-int safeinput(char *str, int length) {
-    char *endPosition = NULL;
-
-    if (fgets(str, length, stdin) != NULL) {
-        endPosition = strchr(str, '\n');
-        if (endPosition != NULL) {
-            *endPosition = '\0';
-        }
-        return 1;
-    } else {
-        return 0;
-    }
-}
+#include "utility.c"
 
 /*
 int check_alphanum(int length) {
@@ -54,6 +40,8 @@ int checkCode(int length) {
     return 1;
 }*/
 
+void addTakeoff(QueueAvion *QueueTakeoff, Avion *avion );
+
 void getHourTime(int t, char *output) {
 
     // next_takeoff = (avion_tmp->heure_decollage[3] - '0') + 10*(avion_tmp->heure_decollage[2] - '0')+60*(avion_tmp->heure_decollage[1] - '0') + 600*(avion_tmp->heure_decollage[0] - '0') ;
@@ -63,10 +51,39 @@ void getHourTime(int t, char *output) {
     snprintf(output, sizeof(output), "%02d%02d ", hours, minutes);
 }
 
+void readCode(char *code, QueueAvion *QueueTakeoff, Compagnie *comp) {
+    //char code[] = "DLA043-D-1143------";
+    //printf("[DEBUG] Code: %s\n", code);
+    if (code[7] == 'D') {
+        //char *id = (char *) malloc(6 * sizeof(char));
+        char id[6];
+        for (int i = 0; i < 6; i++) {
+            id[i] = code[i];
+        }
+        id[6] = '\0';
 
-void addTakeoff(){
+        char hour[4];
+        for (int i = 0; i < 4; i++) {
+            hour[i] = code[i + 9];
+        }
+        hour[4] = '\0';
+        printf(" [DEBUG] TAKEOFF ID: %s | HOUR: %s\n ", id, hour);
+
+        Avion *new_plane = (Avion *) malloc(sizeof(Avion));
+        new_plane->identifiant = strdup(id);
+        new_plane->carburant = 1000;
+        new_plane->consommation = 0; // ATM
+        new_plane->heure_decollage = strdup(hour);
+        new_plane->compagnie = comp;
+
+        addTakeoff(QueueTakeoff, new_plane);
+    }
+}
 
 
+void addTakeoff(QueueAvion *QueueTakeoff, Avion *avion) {
+    pushQueueArray(QueueTakeoff, avion);
+    displayQueueArray(QueueTakeoff);
 
 }
 
@@ -91,10 +108,10 @@ int main() {
     avion1->identifiant = strdup("ABC001");
     avion1->carburant = 1000;
     avion1->consommation = 0; // ATM
-    avion1->heure_decollage = strdup("0100");
+    avion1->heure_decollage = strdup("0010");
     avion1->compagnie = comp;
 
-    QueueAvion *q_takeoff = (QueueAvion *) malloc(sizeof(Queue));
+    //QueueAvion *q_takeoff = (QueueAvion *) malloc(sizeof(Queue));
 
     QueueAvion *QueueTakeoff = (QueueAvion *) malloc(sizeof(QueueAvion));
     initQueueArray(QueueTakeoff, 20);
@@ -127,26 +144,24 @@ int main() {
             }
         }
 
-        char code[20];
-        // Safe input
-        printf("> ");
+        // User action every 5 minutes
+        if (t % 5 == 0) {
+            fflush(stdin);
+            setbuf(stdin, NULL);
+            char code[20];
+            // Safe input
+            printf("> ");
+            safeInput(code, 20);
+            char *p;
+            if ((p = strchr(code, '\n')) != NULL)
+                *p = '\0';
+            if ((p = strchr(code, '\r')) != NULL)
+                *p = '\0';
+            printf("CODE BUGG: %s\n ", code);
+            if (strlen(code) == 19)
+                readCode(code, QueueTakeoff, comp);
+            //printf(" [DEBUG] Input: %s", code);
 
-        char *id =(char*) malloc(4);
-        strncpy(id, code, 2);
-        char *hour = (char*) malloc(4);
-        strncpy(id, code+9, 13);
-        scanf("%4s-%c-%4s",id, NULL, hour);
-        printf("  ALORS %s | %s\n", id, hour);
-        fgets(code, 20, stdin);
-        printf(" [DEBUG] Input: %s", code);
-        if (code[7] == 'D') {
-            char *id =(char*) malloc(4);
-            strncpy(id, code, 2);
-            char *hour = (char*) malloc(4);
-            strncpy(id, code+9, 13);
-            printf("  ALORS %s | %s\n", id, hour);
-
-        }
 
 /*
         // Check the event code
@@ -156,9 +171,9 @@ int main() {
         }
 */
 
-        //
-        //printf("[%04d] RAS\n", t);
-
+            //
+            //printf("[%04d] RAS\n", t);
+        }
     }
 
     printf("[%04d] Exiting...\n", t);

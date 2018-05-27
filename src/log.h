@@ -4,7 +4,7 @@
 
 #include "const.h"
 
-#define LOGFILE "gl.log
+#define LOGFILE "airport.log"
 
 void Log(char *message);
 

@@ -1,12 +1,5 @@
-#include <stdio.h>
 #include "main.h"
-#include "QueueArray.c"
-#include "struct.h"
-#include "struct.c"
-#include "QueueArray.h"
-#include <stdlib.h>
-#include <string.h>
-#include "utility.c"
+#include "const.h"
 
 /*
 int check_alphanum(int length) {
@@ -40,22 +33,28 @@ int checkCode(int length) {
     return 1;
 }*/
 
-void addTakeoff(QueueAvion *QueueTakeoff, Avion *avion );
+void addTakeoff(QueueAvion *QueueTakeoff, Avion *avion);
 
-void getHourTime(int t, char *output) {
+void getHourMinuteTime(int t, char *output) {
+    // Output a time in the HHMM format from t in minutes.
 
-    // next_takeoff = (avion_tmp->heure_decollage[3] - '0') + 10*(avion_tmp->heure_decollage[2] - '0')+60*(avion_tmp->heure_decollage[1] - '0') + 600*(avion_tmp->heure_decollage[0] - '0') ;
     int minutes = t % 60;
     int hours = t / 60;
-    printf("%02d%02d ", hours, minutes);
-    snprintf(output, sizeof(output), "%02d%02d ", hours, minutes);
+    //printf("%02d%02d ", hours, minutes);
+    snprintf(output, sizeof(output), "%02d%02d", hours, minutes);
+    output[4]= '\0';
 }
 
-void readCode(char *code, QueueAvion *QueueTakeoff, Compagnie *comp) {
-    //char code[] = "DLA043-D-1143------";
-    //printf("[DEBUG] Code: %s\n", code);
+int getMinuteTime(char *time) {
+    // Return a time in minutes, from HHMM
+    return (time[3] - '0') + 10 * (time[2] - '0') + 60 * (time[1] - '0') + 600 * (time[0] - '0');
+}
+
+void readCode(char *code, QueueAvion *QueueTakeoff, Compagnie *comp, int t) {
+    // Example of code:
+    // char code[] = "DLA043-D-1143------";
+
     if (code[7] == 'D') {
-        //char *id = (char *) malloc(6 * sizeof(char));
         char id[6];
         for (int i = 0; i < 6; i++) {
             id[i] = code[i];
@@ -67,7 +66,12 @@ void readCode(char *code, QueueAvion *QueueTakeoff, Compagnie *comp) {
             hour[i] = code[i + 9];
         }
         hour[4] = '\0';
-        printf(" [DEBUG] TAKEOFF ID: %s | HOUR: %s\n ", id, hour);
+        if (getMinuteTime(hour) < t+DELAY)
+        {
+            printf("[%04d] => Can't add a plane to takeoff in less than five minutes!\n", t);
+            return;
+        }
+        printf("[%04d] Added to Takeoff: %s @ %s\n ", t, id, hour);
 
         Avion *new_plane = (Avion *) malloc(sizeof(Avion));
         new_plane->identifiant = strdup(id);
@@ -83,8 +87,10 @@ void readCode(char *code, QueueAvion *QueueTakeoff, Compagnie *comp) {
 
 void addTakeoff(QueueAvion *QueueTakeoff, Avion *avion) {
     pushQueueArray(QueueTakeoff, avion);
-    displayQueueArray(QueueTakeoff);
+}
 
+void displayTakeoff(QueueAvion *QueueTakeoff) {
+    displayTakeoffQueueArray(QueueTakeoff);
 }
 
 int main() {
@@ -113,34 +119,44 @@ int main() {
 
     //QueueAvion *q_takeoff = (QueueAvion *) malloc(sizeof(Queue));
 
+
+    // Initializing TakeOff Queue
     QueueAvion *QueueTakeoff = (QueueAvion *) malloc(sizeof(QueueAvion));
     initQueueArray(QueueTakeoff, 20);
+    // Adding a plane to TakeOff Queue
     pushQueueArray(QueueTakeoff, avion1);
-    displayQueueArray(QueueTakeoff);
+    displayTakeoffQueueArray(QueueTakeoff);
+
+    // Initializing Landing Queue
+    QueueAvion *QueueLanding = (QueueAvion *) malloc(sizeof(QueueAvion));
+    initQueueArray(QueueLanding, 20);
+    // Adding a plane to TakeOff Queue
+    //pushQueueArray(QueueTakeoff, avion1);
+    //displayTakeoffQueueArray(QueueTakeoff);
 
     char formatted_time[] = "0000";
 
     int t; // time, 0 to 1439 (23:59)
     for (t = 0; t < 1439; t++) {
-        getHourTime(t, formatted_time);
+        getHourMinuteTime(t, formatted_time);
         // printf("[DEBUG] %d / %s\n", t, formatted_time);
 
         Avion *avion_tmp = (Avion *) malloc(sizeof(Avion));
         if (!isEmpty(QueueTakeoff)) {
             getQueueArray(QueueTakeoff, avion_tmp);
-            int next_takeoff = -1;
-            next_takeoff = (avion_tmp->heure_decollage[3] - '0') + 10 * (avion_tmp->heure_decollage[2] - '0') +
-                           60 * (avion_tmp->heure_decollage[1] - '0') + 600 * (avion_tmp->heure_decollage[0] - '0');
-      //      printf("[DEBUG] Next takeoff: %d / %s\n", next_takeoff, avion_tmp->heure_decollage);
-            if (t >= next_takeoff) {
+            int next_takeoff_t = -1;
+            next_takeoff_t = getMinuteTime(avion_tmp->heure_decollage);
+            //      printf("[DEBUG] Next takeoff: %d / %s\n", next_takeoff_t, avion_tmp->heure_decollage);
+            if (t >= next_takeoff_t) {
                 if (delQueueArray(QueueTakeoff)) {
                     printf("[%04d] Takeoff %s\n", t, avion_tmp->identifiant);
                 }
                 if (!isEmpty(QueueTakeoff)) {
-                    displayQueueArray(QueueTakeoff);
-                }
+                    displayTakeoff(QueueTakeoff);
+                } else
+                    printf("[%04d] No planes in Takeoff Queue\n", t);
             } else {
-                printf("[%04d] No Takeoff, next takeoff: %s\n", t, avion_tmp->heure_decollage);
+                //printf("[%04d] No Takeoff, next takeoff: %s\n", t, avion_tmp->heure_decollage);
             }
         }
 
@@ -149,17 +165,18 @@ int main() {
             fflush(stdin);
             setbuf(stdin, NULL);
             char code[20];
+
             // Safe input
-            printf("> ");
+            printf("[%s] > ", formatted_time);
             safeInput(code, 20);
             char *p;
             if ((p = strchr(code, '\n')) != NULL)
                 *p = '\0';
             if ((p = strchr(code, '\r')) != NULL)
                 *p = '\0';
-            // printf("CODE BUGG: %s\n ", code);
-            if (strlen(code) == 19)
-                readCode(code, QueueTakeoff, comp);
+
+            if (strlen(code) == 19) // CHECK THE TYPE
+                readCode(code, QueueTakeoff, comp, t);
             // printf(" [DEBUG] Input: %s", code);
 
 

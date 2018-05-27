@@ -3,6 +3,7 @@
 //
 
 #include "QueueArray.h"
+#include "main.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -59,15 +60,27 @@ int getQueueArray(QueueAvion *plane, Avion *popped_plane) {
     }
 }
 
+void displayTakeoffQueueArray(QueueAvion *plane) {
+    if (!isEmpty(plane)) {
+        printf("Takeoff Queue:\n");
+        int i;
+        for (i = plane->out; i <= plane->in; i++) {
+            printf("  %s @ %s\n", plane->plane[i].identifiant, plane->plane[i].heure_decollage);
+        }
+    } else {
+        printf(" [DEBUG] Can't print empty Takeoff Queue!\n");
+        return;
+    }
+}
+
 void displayQueueArray(QueueAvion *plane) {
     if (!isEmpty(plane)) {
-        printf("Printing QueueAvion:\n");
         int i;
         for (i = plane->out; i <= plane->in; i++) {
             printf("%s\n", plane->plane[i].identifiant);
         }
     } else {
-        printf(" [DEBUG] Can't print empty QueueAvion!\n");
+        printf(" [DEBUG] Can't print empty Takeoff Queue!\n");
         return;
     }
 }
@@ -105,7 +118,7 @@ int main() {
     if (popQueueArray(QueueAvion, &data)) {
         printf("Value: %d\n", data);
     }
-    displayQueueArray(QueueAvion);
+    displayTakeoffQueueArray(QueueAvion);
 
     return 0;
 }*/

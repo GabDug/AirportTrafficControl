@@ -2,41 +2,8 @@
 #include "main.h"
 #include "const.h"
 
-/*
-int check_alphanum(int length) {
-    for (i = 0; i < length; i++) {
-        int valid = false;
 
-        valid |= s[i] >= 'a' && s[i] <= 'z';
-        valid |= s[i] >= 'A' && s[i] <= 'Z';
-        valid |= s[i] >= '0' && s[i] <= '9';
-        valid |= s[i] == '-';
-
-        if (!valid) {
-            return 0;
-        }
-    }
-    return 1;
-}
-
-int checkCode(int length) {
-    for (i = 0; i < length; i++) {
-        int valid = false;
-
-        valid |= check_alphanum();
-
-        if (!valid) {
-            return 0;
-        }
-
-    }
-    return 1;
-}*/
-
-void addTakeoff(QueueAvion *QueueTakeoff, Cellule_Avion *avion);
-
-
-void readCode(char *code, QueueAvion *QueueTakeoff, ListeLanding *ListLanding, Compagnie *comp, int t) {
+int read_code(char *code, QueueAvion *takeoff_queue, ListeLanding *landing_list, Compagnie *comp, int t) {
     // Example of code:
     // char code[] = "DLA043-D-1143------";
 
@@ -52,9 +19,9 @@ void readCode(char *code, QueueAvion *QueueTakeoff, ListeLanding *ListLanding, C
             hour[i] = code[i + 9];
         }
         hour[4] = '\0';
-        if (getMinuteTime(hour) < t + DELAY) {
+        if (get_minute_time(hour) < t + DELAY) {
             printf("[%04d] => Can't add a plane to takeoff in less than five minutes!\n", t);
-            return;
+            return FALSE;
         }
         printf("[%04d] Added to Takeoff: %s @ %s\n ", t, id, hour);
 
@@ -71,8 +38,9 @@ void readCode(char *code, QueueAvion *QueueTakeoff, ListeLanding *ListLanding, C
         c_avion->suivant_compagnie = NULL;
         c_avion->suivant_attente = NULL;
 
-        addPlaneCompany(comp, c_avion);
-        addTakeoff(QueueTakeoff, c_avion);
+        add_plane_to_company(comp, c_avion);
+        add_plane_takeoff_queue(takeoff_queue, c_avion);
+        return TRUE;
     }
     if (code[7] == 'A') {
         char id[6];
@@ -108,24 +76,16 @@ void readCode(char *code, QueueAvion *QueueTakeoff, ListeLanding *ListLanding, C
         c_avion->suivant_compagnie = NULL;
         c_avion->suivant_attente = NULL;
 
-        addPlaneCompany(comp, c_avion);
-        addPlaneLanding(ListLanding, c_avion);
-        displayLanding(ListLanding, NULL);
+        add_plane_to_company(comp, c_avion);
+        add_plane_landing(landing_list, c_avion);
+        display_landing(landing_list, NULL);
+        return TRUE;
     }
 }
 
 
-void addTakeoff(QueueAvion *QueueTakeoff, Cellule_Avion *avion) {
-    pushQueueArray(QueueTakeoff, avion);
-}
-
-void displayTakeoff(QueueAvion *QueueTakeoff) {
-    displayTakeoffQueueArray(QueueTakeoff);
-}
-
-
 int main() {
-    printf("AIRPORT CONTROL SIMULATOR - WIP\n");
+    printf("AIRPORT CONTROL SIMULATOR - WIP\n\n");
 
     // Loading
     // Creating the company
@@ -158,21 +118,19 @@ int main() {
     c_avion1->suivant_compagnie = NULL;
     c_avion1->suivant_attente = NULL;
 
-    addPlaneCompany(comp, c_avion1);
-
-    //QueueAvion *q_takeoff = (QueueAvion *) malloc(sizeof(Queue));
+    add_plane_to_company(comp, c_avion1);
 
 
     // Initializing TakeOff Queue
-    QueueAvion *QueueTakeoff = (QueueAvion *) malloc(sizeof(QueueAvion));
-    initQueueArray(QueueTakeoff, 20);
+    QueueAvion *takeoff_queue = (QueueAvion *) malloc(sizeof(QueueAvion));
+    init_takeoff_queue(takeoff_queue, 20);
     // Adding a plane to TakeOff Queue
-    pushQueueArray(QueueTakeoff, c_avion1);
+    add_plane_takeoff_queue(takeoff_queue, c_avion1);
 
 
     Avion *avion2 = (Avion *) malloc(sizeof(Avion));
     avion2->identifiant = strdup("ABC004");
-    avion2->carburant = 2000;
+    avion2->carburant = 99;
     avion2->consommation = 20; // ATM
     avion2->heure_decollage = NULL;
     avion2->compagnie = comp;
@@ -185,54 +143,69 @@ int main() {
 
 
     // Initializing Landing Queue
-    ListeLanding *ListLanding = (ListeLanding *) malloc(sizeof(ListeLanding));
-    ListLanding->first = NULL;
-    addPlaneLanding(ListLanding, c_avion2);
+    ListeLanding *landing_list = (ListeLanding *) malloc(sizeof(ListeLanding));
+    landing_list->first = NULL;
+    add_plane_landing(landing_list, c_avion2);
+    add_plane_to_company(comp, c_avion2);
 
-    displayCompanyPlanes(comp);
-    displayTakeoffQueueArray(QueueTakeoff);
-    displayLanding(ListLanding, NULL);
+
+    printf("[0000] Initial planes:\n");
+    display_planes_company(comp);
+    display_takeoff_queue(takeoff_queue, NULL);
+    display_landing(landing_list, NULL);
+    printf("\n[0000] Commands:\n"
+           "         'takeoff' too see next takeoffs\n"
+           "         'landing' too see next landings\n"
+           "         'exit' to exit the program\n"
+           "         Formatted codes to add planes\n"
+           "         Enter to skip\n");
+    printf("[0000] Beginning the simulation:\n");
+
 
 
     char f_t[] = "0000";
 
     int t; // t, 0 to 1439 (23:59)
     for (t = 0; t < 1439; t++) {
-        getHourMinuteTime(t, f_t);
+        get_hour_minute_time(t, f_t);
 
         // Landing
-        if (!isEmptyLanding(ListLanding)) {
+        if (!is_empty_landing(landing_list)) {
             Cellule_Avion *c_avion_tmp = (Cellule_Avion *) malloc(sizeof(Cellule_Avion));
-            popLanding(ListLanding, c_avion_tmp);
-
+            pop_plane_landing(landing_list, c_avion_tmp);
 
             printf("[%s] Landing %s\n", f_t, c_avion_tmp->avion->identifiant);
+            Log(f_t, c_avion_tmp->avion->identifiant, 'a', c_avion_tmp->avion->carburant,
+                c_avion_tmp->avion->consommation);
 
-            if (!isEmptyLanding(ListLanding)) {
-                displayLanding(ListLanding, f_t);
+            if (!is_empty_landing(landing_list)) {
+                display_landing(landing_list, f_t);
             } else
-                printf("[%04d] No planes in landing Queue\n", t);
+                printf("[%04d] No more planes waiting for landing.\n", t);
 
             free(c_avion_tmp);
         }
 
 
         // Takeoff
-        if (!isEmpty(QueueTakeoff)) {
+        if (!is_empty_takeoff_queue(takeoff_queue)) {
             Cellule_Avion *c_avion_tmp = (Cellule_Avion *) malloc(sizeof(Cellule_Avion));
-            getQueueArray(QueueTakeoff, c_avion_tmp);
+            get_plane_takeoff_queue(takeoff_queue, c_avion_tmp);
             int next_takeoff_t = -1;
-            next_takeoff_t = getMinuteTime(c_avion_tmp->avion->heure_decollage);
+            next_takeoff_t = get_minute_time(c_avion_tmp->avion->heure_decollage);
             //      printf("[DEBUG] Next takeoff: %d / %s\n", next_takeoff_t, c_avion_tmp->heure_decollage);
             if (t >= next_takeoff_t) {
-                if (delQueueArray(QueueTakeoff)) {
+                if (del_plane_takeoff_queue(takeoff_queue)) {
                     printf("[%04d] Takeoff %s\n", t, c_avion_tmp->avion->identifiant);
+                    Log(f_t, c_avion_tmp->avion->identifiant, 'd', c_avion_tmp->avion->carburant,
+                        c_avion_tmp->avion->consommation);
+
                     free(c_avion_tmp);
                 }
-                if (!isEmpty(QueueTakeoff)) {
-                    displayTakeoff(QueueTakeoff);
+                if (!is_empty_takeoff_queue(takeoff_queue)) {
+                    display_takeoff_queue(takeoff_queue, f_t);
                 } else
-                    printf("[%04d] No planes in Takeoff Queue\n", t);
+                    printf("[%04d] No more planes waiting for takeoff.\n", t);
             } else {
                 //printf("[%04d] No Takeoff, next takeoff: %s\n", t, c_avion_tmp->heure_decollage);
             }
@@ -241,38 +214,87 @@ int main() {
 
         // User action every 5 minutes
         if (t % 5 == 0) {
-            fflush(stdin);
-            setbuf(stdin, NULL);
-            char code[20];
+            while (TRUE) {
+                fflush(stdin);
+                setbuf(stdin, NULL);
+                char code[20];
 
-            // Safe input
-            printf("[%s] > ", f_t);
-            safeInput(code, 20);
-            char *p;
-            if ((p = strchr(code, '\n')) != NULL)
-                *p = '\0';
-            if ((p = strchr(code, '\r')) != NULL)
-                *p = '\0';
+                // Safe input
+                printf("[%s] > ", f_t);
 
-            if (strlen(code) == 19) // CHECK THE TYPE
-                readCode(code, QueueTakeoff, ListLanding, comp, t);
-            // printf(" [DEBUG] Input: %s", code);
+                safe_input(code, 20);
+                char *p;
+                if ((p = strchr(code, '\n')) != NULL)
+                    *p = '\0';
+                if ((p = strchr(code, '\r')) != NULL)
+                    *p = '\0';
 
-
-            /*
-            // Check the event code
-            if (!checkCode(code)){
-                printf("Incorrect code");
-                continue;
+                if (strlen(code) == 19) {
+                    if (code[6] == '-' && code[8] == '-' && code[13] == '-' && code[16] == '-') {
+                        if (read_code(code, takeoff_queue, landing_list, comp, t)) {
+                            break;
+                        }
+                    }
+                } else {
+                    if (strcmp("takeoff", code) == 0) {
+                        display_takeoff_queue(takeoff_queue, f_t);
+                        break;
+                    }
+                    if (strcmp("landing", code) == 0) {
+                        display_landing(landing_list, f_t);
+                        break;
+                    }
+                    if (strcmp("exit", code) == 0) {
+                        exit(1);
+                    }
+                    if (strcmp("companies", code) == 0) {
+                        // Not implemented
+                        printf("NOT IMPLEMENTED YET");
+                        break;
+                    }
+                    if (strcmp("", code) == 0) {
+                        // Pass
+                        break;
+                    }
+                }
+                printf("Invalid input!\n");
             }
-            */
-
-            //
-            //printf("[%04d] RAS\n", t);
         }
-        updateFuelLanding(ListLanding, f_t);
+        update_fuel_landing(landing_list, f_t);
     }
 
     printf("[%04d] Exiting...\n", t);
     return 0;
 }
+
+
+/*
+int check_alphanum(int length) {
+    for (i = 0; i < length; i++) {
+        int valid = false;
+
+        valid |= s[i] >= 'a' && s[i] <= 'z';
+        valid |= s[i] >= 'A' && s[i] <= 'Z';
+        valid |= s[i] >= '0' && s[i] <= '9';
+        valid |= s[i] == '-';
+
+        if (!valid) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+int checkCode(int length) {
+    for (i = 0; i < length; i++) {
+        int valid = false;
+
+        valid |= check_alphanum();
+
+        if (!valid) {
+            return 0;
+        }
+
+    }
+    return 1;
+}*/

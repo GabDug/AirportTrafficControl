@@ -6,6 +6,6 @@
 
 #define LOGFILE "airport.log"
 
-void Log(char *message);
+void Log(char *f_t, char *plane_code, char operation, int fuel, int consumption);
 
 #endif //AIRPORT_LOG_H

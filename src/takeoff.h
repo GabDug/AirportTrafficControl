@@ -11,10 +11,11 @@ typedef struct {
     int size;
     int in;
     int out;
-}QueueAvion;
+} QueueAvion;
 
 
-int isEmpty(QueueAvion *qu);
-int isFull(QueueAvion *qu);
+int is_empty_takeoff_queue(QueueAvion *queue);
+
+int is_full_takeoff_queue(QueueAvion *queue);
 
 #endif //C_QUEUEARRAY_H

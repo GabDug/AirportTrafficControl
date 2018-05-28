@@ -1,14 +1,14 @@
 #include "main.h"
 
-void addPlaneLanding(ListeLanding *l, Cellule_Avion *nelt);
+void add_plane_landing(ListeLanding *l, Cellule_Avion *nelt);
 
-void displayLanding(ListeLanding *l, char *);
+void display_landing(ListeLanding *l, char *);
 
-void updateFuelLanding(ListeLanding *l, char *);
+void update_fuel_landing(ListeLanding *l, char *);
 
-int isEmptyLanding(ListeLanding *l);
+int is_empty_landing(ListeLanding *l);
 
-void addPlaneLanding(ListeLanding *l, Cellule_Avion *nelt) {
+void add_plane_landing(ListeLanding *l, Cellule_Avion *nelt) {
     Cellule_Avion *first = l->first;
 
     if (l->first == NULL) {
@@ -30,35 +30,43 @@ void addPlaneLanding(ListeLanding *l, Cellule_Avion *nelt) {
         }
         cur = cur->suivant_attente;
     }
-    save = cur->suivant_attente; // Temp is N+1 element
+    save = cur->suivant_attente;
     cur->suivant_attente = nelt;
     nelt->suivant_attente = save;
 }
 
-void popLanding(ListeLanding *l, Cellule_Avion *save) {
-    if (!isEmptyLanding(l)) {
+void pop_plane_landing(ListeLanding *l, Cellule_Avion *save) {
+    if (!is_empty_landing(l)) {
         *save = *l->first;
         l->first = l->first->suivant_attente;
     }
 }
 
-void displayLanding(ListeLanding *l, char *f_t) {
-    Cellule_Avion *plane;
-    plane = l->first;
-    if (f_t != NULL)
-        printf("[%s] Landing Queue:\n", f_t);
-    else
-        printf("Landing Queue:\n");
-    while (plane != NULL) {
-        printf("  %s (Fuel time left: %d)\n", plane->avion->identifiant,
-               plane->avion->carburant / plane->avion->consommation);
+void display_landing(ListeLanding *l, char *f_t) {
+    if (!is_empty_landing(l)) {
+        Cellule_Avion *plane;
+        plane = l->first;
+        if (f_t != NULL)
+            printf("[%s] Landing Queue:\n", f_t);
+        else
+            printf("Landing Queue:\n");
+        while (plane != NULL) {
+            printf("  %s (Fuel time left: %d)\n", plane->avion->identifiant,
+                   plane->avion->carburant / plane->avion->consommation);
 
-        plane = plane->suivant_attente;
+            plane = plane->suivant_attente;
+        }
+    } else {
+        if (f_t != NULL)
+            printf("[%s] No planes waiting for landing!\n", f_t);
+        else
+            printf("No planes waiting for landing!\n");
+        return;
     }
 }
 
-void updateFuelLanding(ListeLanding *l, char *f_t) {
-    if (!isEmptyLanding(l)) {
+void update_fuel_landing(ListeLanding *l, char *f_t) {
+    if (!is_empty_landing(l)) {
         Cellule_Avion *plane;
         plane = l->first;
         printf("[%s] Updating Fuel:\n", f_t);
@@ -72,7 +80,7 @@ void updateFuelLanding(ListeLanding *l, char *f_t) {
     }
 }
 
-int isEmptyLanding(ListeLanding *l) {
+int is_empty_landing(ListeLanding *l) {
     if (l->first == NULL)
         return TRUE;
     else

@@ -5,14 +5,15 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "QueueArray.c"
+#include "takeoff.c"
 #include "struct.c"
 #include "utility.c"
 #include "landing.c"
 #include "company.c"
+#include "log.c"
 
 #include "struct.h"
-#include "QueueArray.h"
+#include "takeoff.h"
 
 
 #endif //AIRPORT_MAIN_H

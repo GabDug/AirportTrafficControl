@@ -1,10 +1,10 @@
 #include "main.h"
 
-void addPlaneCompany(Compagnie *comp, Cellule_Avion *cplane);
+void add_plane_to_company(Compagnie *comp, Cellule_Avion *c_plane);
 
-void displayCompanyPlanes(Compagnie *comp);
+void display_planes_company(Compagnie *comp);
 
-void displayCompanyPlanes(Compagnie *comp) {
+void display_planes_company(Compagnie *comp) {
     Cellule_Avion *el;
     el = comp->avions_compagnie->first;
     if (el == NULL) {
@@ -16,24 +16,21 @@ void displayCompanyPlanes(Compagnie *comp) {
         printf("  %s\n", el->avion->identifiant);
         el = el->suivant_compagnie;
     }
-
 }
 
-void addPlaneCompany(Compagnie *comp, Cellule_Avion *cplane) {
+void add_plane_to_company(Compagnie *comp, Cellule_Avion *c_plane) {
     if (comp->avions_compagnie->first == NULL && comp->avions_compagnie->last == NULL) {
-        printf("  [DEBUG] First plane added\n");
-        comp->avions_compagnie->first = cplane;
-        comp->avions_compagnie->last = cplane;
+        comp->avions_compagnie->first = c_plane;
+        comp->avions_compagnie->last = c_plane;
         return;
     }
 
-    cplane->suivant_compagnie = NULL;
+    c_plane->suivant_compagnie = NULL;
     if (comp->avions_compagnie->first == NULL)
-        comp->avions_compagnie->first = cplane;
+        comp->avions_compagnie->first = c_plane;
     if (comp->avions_compagnie->last != NULL) {
-        //    printf("%s\n", comp->avions_compagnie->last->avion->identifiant);
-        comp->avions_compagnie->last->suivant_compagnie = cplane;
+        comp->avions_compagnie->last->suivant_compagnie = c_plane;
     }
-    comp->avions_compagnie->last = cplane;
-    displayCompanyPlanes(comp);
+    comp->avions_compagnie->last = c_plane;
+    // display_planes_company(comp);
 }

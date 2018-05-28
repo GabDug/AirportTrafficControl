@@ -1,10 +1,5 @@
-//
-// Created by Gabriel DUGNY on 23/05/2018.
-//
-
 #ifndef AIRPORT_USER_INTERACT_H
 #define AIRPORT_USER_INTERACT_H
-
 
 
 void deleteLandingPlane();
@@ -23,9 +18,6 @@ void getStatus(Compagnie company);
 
 
 void getHistory();
-
-
-
 
 
 #endif //AIRPORT_USER_INTERACT_H

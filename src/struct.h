@@ -53,5 +53,4 @@ typedef struct cellule_compagnie {
 } Cellule_compagnie;
 
 
-
 #endif //AIRPORT_STRUCT_H

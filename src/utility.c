@@ -4,12 +4,15 @@
 
 
 void clean(char *str);
-int safeInput(char *str, int length);
+
+int safe_input(char *str, int length);
+
 void purge();
 
 
-void getHourMinuteTime(int t, char *output);
-int getMinuteTime(char *time);
+void get_hour_minute_time(int t, char *output);
+
+int get_minute_time(char *time);
 
 
 void purge() {
@@ -28,7 +31,7 @@ void clean(char *str) {
     }
 }
 
-int safeInput(char *str, int length) {
+int safe_input(char *str, int length) {
     char *endPosition = NULL;
 
     if (fgets(str, length, stdin) != NULL) {
@@ -43,18 +46,18 @@ int safeInput(char *str, int length) {
     }
 }
 
-void getHourMinuteTime(int t, char *output) {
+void get_hour_minute_time(int t, char *output) {
     // Output a time in the HHMM format from t in minutes.
 
     int minutes = t % 60;
     int hours = t / 60;
-    //printf("%02d%02d ", hours, minutes);
     snprintf(output, sizeof(output), "%02d%02d", hours, minutes);
     output[4] = '\0';
 }
 
-int getMinuteTime(char *time) {
+int get_minute_time(char *time) {
     // Return a time in minutes, from HHMM
+
     return (time[3] - '0') + 10 * (time[2] - '0') + 60 * (time[1] - '0') + 600 * (time[0] - '0');
 }
 

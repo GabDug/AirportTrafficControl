@@ -110,7 +110,7 @@ void readCode(char *code, QueueAvion *QueueTakeoff, ListeLanding *ListLanding, C
 
         addPlaneCompany(comp, c_avion);
         addPlaneLanding(ListLanding, c_avion);
-        displayLanding(ListLanding);
+        displayLanding(ListLanding, NULL);
     }
 }
 
@@ -191,18 +191,35 @@ int main() {
 
     displayCompanyPlanes(comp);
     displayTakeoffQueueArray(QueueTakeoff);
-    displayLanding(ListLanding);
+    displayLanding(ListLanding, NULL);
 
 
-    char formatted_time[] = "0000";
+    char f_t[] = "0000";
 
-    int t; // time, 0 to 1439 (23:59)
+    int t; // t, 0 to 1439 (23:59)
     for (t = 0; t < 1439; t++) {
-        getHourMinuteTime(t, formatted_time);
-        // printf("[DEBUG] %d / %s\n", t, formatted_time);
+        getHourMinuteTime(t, f_t);
 
-        Cellule_Avion *c_avion_tmp = (Cellule_Avion *) malloc(sizeof(Cellule_Avion));
+        // Landing
+        if (!isEmptyLanding(ListLanding)) {
+            Cellule_Avion *c_avion_tmp = (Cellule_Avion *) malloc(sizeof(Cellule_Avion));
+            popLanding(ListLanding, c_avion_tmp);
+
+
+            printf("[%s] Landing %s\n", f_t, c_avion_tmp->avion->identifiant);
+
+            if (!isEmptyLanding(ListLanding)) {
+                displayLanding(ListLanding, f_t);
+            } else
+                printf("[%04d] No planes in landing Queue\n", t);
+
+            free(c_avion_tmp);
+        }
+
+
+        // Takeoff
         if (!isEmpty(QueueTakeoff)) {
+            Cellule_Avion *c_avion_tmp = (Cellule_Avion *) malloc(sizeof(Cellule_Avion));
             getQueueArray(QueueTakeoff, c_avion_tmp);
             int next_takeoff_t = -1;
             next_takeoff_t = getMinuteTime(c_avion_tmp->avion->heure_decollage);
@@ -210,6 +227,7 @@ int main() {
             if (t >= next_takeoff_t) {
                 if (delQueueArray(QueueTakeoff)) {
                     printf("[%04d] Takeoff %s\n", t, c_avion_tmp->avion->identifiant);
+                    free(c_avion_tmp);
                 }
                 if (!isEmpty(QueueTakeoff)) {
                     displayTakeoff(QueueTakeoff);
@@ -218,6 +236,7 @@ int main() {
             } else {
                 //printf("[%04d] No Takeoff, next takeoff: %s\n", t, c_avion_tmp->heure_decollage);
             }
+
         }
 
         // User action every 5 minutes
@@ -227,7 +246,7 @@ int main() {
             char code[20];
 
             // Safe input
-            printf("[%s] > ", formatted_time);
+            printf("[%s] > ", f_t);
             safeInput(code, 20);
             char *p;
             if ((p = strchr(code, '\n')) != NULL)
@@ -240,17 +259,18 @@ int main() {
             // printf(" [DEBUG] Input: %s", code);
 
 
-/*
-        // Check the event code
-        if (!checkCode(code)){
-            printf("Incorrect code");
-            continue;
-        }
-*/
+            /*
+            // Check the event code
+            if (!checkCode(code)){
+                printf("Incorrect code");
+                continue;
+            }
+            */
 
             //
             //printf("[%04d] RAS\n", t);
         }
+        updateFuelLanding(ListLanding, f_t);
     }
 
     printf("[%04d] Exiting...\n", t);

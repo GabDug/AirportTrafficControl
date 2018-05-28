@@ -1,3 +1,4 @@
+#include <inttypes.h>
 #include "main.h"
 #include "const.h"
 
@@ -18,7 +19,6 @@ int check_alphanum(int length) {
     return 1;
 }
 
-
 int checkCode(int length) {
     for (i = 0; i < length; i++) {
         int valid = false;
@@ -35,22 +35,8 @@ int checkCode(int length) {
 
 void addTakeoff(QueueAvion *QueueTakeoff, Cellule_Avion *avion);
 
-void getHourMinuteTime(int t, char *output) {
-    // Output a time in the HHMM format from t in minutes.
 
-    int minutes = t % 60;
-    int hours = t / 60;
-    //printf("%02d%02d ", hours, minutes);
-    snprintf(output, sizeof(output), "%02d%02d", hours, minutes);
-    output[4]= '\0';
-}
-
-int getMinuteTime(char *time) {
-    // Return a time in minutes, from HHMM
-    return (time[3] - '0') + 10 * (time[2] - '0') + 60 * (time[1] - '0') + 600 * (time[0] - '0');
-}
-
-void readCode(char *code, QueueAvion *QueueTakeoff, Compagnie *comp, int t) {
+void readCode(char *code, QueueAvion *QueueTakeoff, ListeLanding *ListLanding, Compagnie *comp, int t) {
     // Example of code:
     // char code[] = "DLA043-D-1143------";
 
@@ -66,8 +52,7 @@ void readCode(char *code, QueueAvion *QueueTakeoff, Compagnie *comp, int t) {
             hour[i] = code[i + 9];
         }
         hour[4] = '\0';
-        if (getMinuteTime(hour) < t+DELAY)
-        {
+        if (getMinuteTime(hour) < t + DELAY) {
             printf("[%04d] => Can't add a plane to takeoff in less than five minutes!\n", t);
             return;
         }
@@ -87,7 +72,45 @@ void readCode(char *code, QueueAvion *QueueTakeoff, Compagnie *comp, int t) {
         c_avion->suivant_attente = NULL;
 
         addPlaneCompany(comp, c_avion);
-        //addTakeoff(QueueTakeoff, c_avion);
+        addTakeoff(QueueTakeoff, c_avion);
+    }
+    if (code[7] == 'A') {
+        char id[6];
+        for (int i = 0; i < 6; i++) {
+            id[i] = code[i];
+        }
+        id[6] = '\0';
+
+        char fuel[2];
+        for (int i = 0; i < 2; i++) {
+            fuel[i] = code[i + 14];
+        }
+        fuel[2] = '\0';
+
+        /*char consumption[2];
+        for (int i = 0; i < 2; i++) {
+            consumption[2] = code[i + 17];
+        }
+        consumption[2] = '\0';
+*/
+
+        Avion *new_plane = (Avion *) malloc(sizeof(Avion));
+        new_plane->identifiant = strdup(id);
+        new_plane->carburant = (int) atoi(fuel);
+        new_plane->consommation = (int) 1;
+        new_plane->heure_decollage = NULL;
+        new_plane->compagnie = comp;
+        printf("[%04d] Added to landing: %s (Fuel time left: %d)\n", t, id, new_plane->carburant);
+
+        Cellule_Avion *c_avion = (Cellule_Avion *) malloc(sizeof(Cellule_Avion));
+        c_avion->avion = new_plane;
+        c_avion->precedent_compagnie = NULL;
+        c_avion->suivant_compagnie = NULL;
+        c_avion->suivant_attente = NULL;
+
+        addPlaneCompany(comp, c_avion);
+        addPlaneLanding(ListLanding, c_avion);
+        displayLanding(ListLanding);
     }
 }
 
@@ -99,7 +122,6 @@ void addTakeoff(QueueAvion *QueueTakeoff, Cellule_Avion *avion) {
 void displayTakeoff(QueueAvion *QueueTakeoff) {
     displayTakeoffQueueArray(QueueTakeoff);
 }
-
 
 
 int main() {
@@ -114,7 +136,6 @@ int main() {
     comp->avions_compagnie = liste_avions_comp;
     comp->avions_compagnie->first = NULL;
     comp->avions_compagnie->last = NULL;
-
 
 
     Cellule_compagnie *liste_compagnie = (Cellule_compagnie *) malloc(sizeof(Cellule_compagnie));
@@ -149,7 +170,6 @@ int main() {
     pushQueueArray(QueueTakeoff, c_avion1);
 
 
-
     Avion *avion2 = (Avion *) malloc(sizeof(Avion));
     avion2->identifiant = strdup("ABC004");
     avion2->carburant = 2000;
@@ -166,7 +186,7 @@ int main() {
 
     // Initializing Landing Queue
     ListeLanding *ListLanding = (ListeLanding *) malloc(sizeof(ListeLanding));
-    ListLanding->first=NULL;
+    ListLanding->first = NULL;
     addPlaneLanding(ListLanding, c_avion2);
 
     displayCompanyPlanes(comp);
@@ -216,7 +236,7 @@ int main() {
                 *p = '\0';
 
             if (strlen(code) == 19) // CHECK THE TYPE
-                readCode(code, QueueTakeoff, comp, t);
+                readCode(code, QueueTakeoff, ListLanding, comp, t);
             // printf(" [DEBUG] Input: %s", code);
 
 

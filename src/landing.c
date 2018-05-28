@@ -1,4 +1,3 @@
-#include "landing.h"
 
 
 void addPlaneLanding(ListeLanding *l, Cellule_Avion *nelt);

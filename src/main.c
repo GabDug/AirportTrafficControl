@@ -7,6 +7,7 @@ int read_code(char *code, QueueAvion *takeoff_queue, ListeLanding *landing_list,
     // Example of code:
     // char code[] = "DLA043-D-1143------";
 
+    // Takeoff
     if (code[7] == 'D') {
         char id[6];
         for (int i = 0; i < 6; i++) {
@@ -19,6 +20,7 @@ int read_code(char *code, QueueAvion *takeoff_queue, ListeLanding *landing_list,
             hour[i] = code[i + 9];
         }
         hour[4] = '\0';
+        
         if (get_minute_time(hour) < t + DELAY) {
             printf("[%04d] => Can't add a plane to takeoff in less than five minutes!\n", t);
             return FALSE;
@@ -107,8 +109,8 @@ int main() {
 
     Avion *avion1 = (Avion *) malloc(sizeof(Avion));
     avion1->identifiant = strdup("ABC001");
-    avion1->carburant = 1000;
-    avion1->consommation = 0; // ATM
+    avion1->carburant = 99;
+    avion1->consommation = 1; // ATM
     avion1->heure_decollage = strdup("0010");
     avion1->compagnie = comp;
 
@@ -131,7 +133,7 @@ int main() {
     Avion *avion2 = (Avion *) malloc(sizeof(Avion));
     avion2->identifiant = strdup("ABC004");
     avion2->carburant = 99;
-    avion2->consommation = 20; // ATM
+    avion2->consommation = 10; // ATM
     avion2->heure_decollage = NULL;
     avion2->compagnie = comp;
 

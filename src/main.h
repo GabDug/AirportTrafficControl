@@ -1,7 +1,3 @@
-//
-// Created by Gabriel DUGNY on 23/05/2018.
-//
-
 #ifndef AIRPORT_MAIN_H
 #define AIRPORT_MAIN_H
 
@@ -11,7 +7,9 @@
 
 #include "QueueArray.c"
 #include "struct.c"
-#include "shell_io.c"
+#include "utility.c"
+#include "landing.c"
+#include "company.c"
 
 #include "struct.h"
 #include "QueueArray.h"

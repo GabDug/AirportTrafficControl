@@ -5,9 +5,7 @@
 #ifndef AIRPORT_USER_INTERACT_H
 #define AIRPORT_USER_INTERACT_H
 
-void addTakeoffPlane();
 
-void addLandingPlane();
 
 void deleteLandingPlane();
 
@@ -23,9 +21,6 @@ void loadPriorityAndBlackListCompany();
 
 void getStatus(Compagnie company);
 
-void getTakeoff();
-
-void getLanding();
 
 void getHistory();
 

@@ -1,7 +1,3 @@
-//
-// Created by gabri on 05/04/2018.
-//
-
 #include "QueueArray.h"
 #include "main.h"
 #include <stdio.h>
@@ -13,10 +9,10 @@ void initQueueArray(QueueAvion *plane, int size) {
     // The size is from 0 so if size is 2 you can put 3 elements.
     plane->in = -1;
     plane->out = 0;
-    plane->plane = (Avion *) malloc(size * sizeof(Avion));
+    plane->plane = (Cellule_Avion*) malloc(size * sizeof(Cellule_Avion));
 }
 
-void pushQueueArray(QueueAvion *plane, Avion *new_plane) {
+void pushQueueArray(QueueAvion *plane, Cellule_Avion *new_plane) {
     // Check if FULL
     if (!isFull(plane)) {
         plane->in++;
@@ -28,7 +24,7 @@ void pushQueueArray(QueueAvion *plane, Avion *new_plane) {
 }
 
 //int popQueueArray(QueueAvion *plane, Avion *popped_plane) {
-int popQueueArray(QueueAvion *plane, Avion *popped_plane) {
+int popQueueArray(QueueAvion *plane, Cellule_Avion *popped_plane) {
     if (!isEmpty(plane)) {
         *popped_plane = plane->plane[plane->out];
         plane->out++;
@@ -49,7 +45,7 @@ int delQueueArray(QueueAvion *plane) {
     }
 }
 
-int getQueueArray(QueueAvion *plane, Avion *popped_plane) {
+int getQueueArray(QueueAvion *plane, Cellule_Avion *popped_plane) {
     if (!isEmpty(plane)) {
         *popped_plane = plane->plane[plane->out];
         //plane->out++;
@@ -65,7 +61,7 @@ void displayTakeoffQueueArray(QueueAvion *plane) {
         printf("Takeoff Queue:\n");
         int i;
         for (i = plane->out; i <= plane->in; i++) {
-            printf("  %s @ %s\n", plane->plane[i].identifiant, plane->plane[i].heure_decollage);
+            printf("  %s @ %s\n", plane->plane[i].avion->identifiant, plane->plane[i].avion->heure_decollage);
         }
     } else {
         printf(" [DEBUG] Can't print empty Takeoff Queue!\n");
@@ -77,7 +73,7 @@ void displayQueueArray(QueueAvion *plane) {
     if (!isEmpty(plane)) {
         int i;
         for (i = plane->out; i <= plane->in; i++) {
-            printf("%s\n", plane->plane[i].identifiant);
+            printf("%s\n", plane->plane[i].avion->identifiant);
         }
     } else {
         printf(" [DEBUG] Can't print empty Takeoff Queue!\n");

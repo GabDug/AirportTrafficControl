@@ -3,58 +3,55 @@
 #define AIRPORT_STRUCT_H
 
 
-typedef struct cellule_avion {
-    int avion;
-    struct cellule_avion *suivant_compagnie;
-    struct cellule_avion *precedent_compagnie;
-    struct cellule_avion *suivant_attente;
-} Cellule_Avion;
-
-typedef struct dll {
-    Cellule_Avion *first;
-    Cellule_Avion *last;
-} Liste_avion;
-
 /* UNUSED ATM
 typedef struct ll {
     Cellule_Avion *first;
 } Liste_companie;*/
 
-typedef struct avion Avion ;
-typedef struct compagnie Compagnie ;
-typedef struct cellule_compagnie Cellule_compagnie ;
 
 
-struct avion{
-    char* identifiant;
+typedef struct avion Avion;
+typedef struct compagnie Compagnie;
+typedef struct cellule_compagnie Cellule_compagnie;
+
+
+struct avion {
+    char *identifiant;
     int carburant;
     int consommation;
-    char* heure_decollage;
-    Compagnie* compagnie;
-   // int compagnie;
+    char *heure_decollage;
+    Compagnie *compagnie;
 };
 
+typedef struct cellule_avion {
+    Avion *avion;
+    struct cellule_avion *suivant_compagnie;
+    struct cellule_avion *precedent_compagnie;
+    struct cellule_avion *suivant_attente;
+} Cellule_Avion;
 
-struct compagnie{
-    char* nom;
-    char* acronyme;
-    Liste_avion avions_compagnie;
-};
-
-typedef struct cellule_compagnie{
-    Compagnie *comp;
-    struct cellule_compagnie* suivant;
-} Cellule_compagnie;
-
-/*
-typedef struct queue{
-    Liste_avion premier;
-    Liste_avion dernier;
-}Queue;*/
-
-typedef struct dll_op {
+typedef struct liste_avion {
     Cellule_Avion *first;
     Cellule_Avion *last;
-} Queue;
+} Liste_avion;
+
+
+typedef struct liste_landing {
+    Cellule_Avion *first;
+} ListeLanding;
+
+
+struct compagnie {
+    char *nom;
+    char *acronyme;
+    Liste_avion *avions_compagnie;
+};
+
+typedef struct cellule_compagnie {
+    Compagnie *comp;
+    struct cellule_compagnie *suivant;
+} Cellule_compagnie;
+
+
 
 #endif //AIRPORT_STRUCT_H

@@ -91,21 +91,6 @@ int insertTop(Liste_avion *l, Cellule_Avion *suivant_compagnie) {
         l->last = suivant_compagnie;
 }
 
-/* UNUSED ATM
-int simple_insertTop(Liste_avion *l, Cellule_Avion *suivant_compagnie) {
-    Cellule_Avion *f = l->first;
-
-    suivant_compagnie->suivant_compagnie = f;
-    suivant_compagnie->precedent_compagnie = NULL;
-
-    l->first = suivant_compagnie; // set first element of list as the new one
-
-    if (f != NULL)
-        f->precedent_compagnie = suivant_compagnie;
-    else
-        l->last = suivant_compagnie;
-}*/
-
 void displayAscending(Liste_avion *mylist) {
     Cellule_Avion *el;
     el = mylist->first;
@@ -116,7 +101,9 @@ void displayAscending(Liste_avion *mylist) {
 }
 
 
-void addLast(Liste_avion *l, Cellule_Avion *nelt) {
+/*
+void addLast(ListeLanding *l, Cellule_Avion *nelt) {
+    int t_left = nelt->avion->carburant / nelt->avion->consommation;
     Cellule_Avion *last = l->last;
     nelt->precedent_compagnie = last;
     nelt->suivant_compagnie = NULL;
@@ -125,41 +112,9 @@ void addLast(Liste_avion *l, Cellule_Avion *nelt) {
         last->suivant_compagnie = nelt;
     else
         l->first = nelt;
-}
+}*/
 
-int addNth(Liste_avion *l, Cellule_Avion *nelt, int n) {
-    Cellule_Avion *first = l->first;
 
-    int i = 0;
-    Cellule_Avion *cur = l->first;
-    Cellule_Avion *save = NULL;
-
-    // If add first
-    if (n == 0) {
-        return -1;
-        //return DeleteFirst(l);
-    }
-
-    for (i = 0; i < n - 1; i++) {
-        if (cur->suivant_compagnie == NULL) {
-            // If we reach the end of the linked list before n elements
-            return -1;
-        }
-        cur = cur->suivant_compagnie;
-    }
-
-    save = cur->suivant_compagnie; // Temp is N+1 element
-    cur->suivant_compagnie = save->suivant_compagnie; // Cur is not in the list anymore
-    return 0;
-/*
-    nelt->precedent_compagnie = last;
-    nelt->suivant_compagnie = NULL;
-    l->last = nelt;
-    if (last != NULL)
-        last->suivant_compagnie = nelt;
-    else
-        l->first = nelt;
-*/}
 
 // Correction
 void insertPos(Liste_avion *l, Cellule_Avion *nelt, int x) {

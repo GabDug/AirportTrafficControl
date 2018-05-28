@@ -33,7 +33,7 @@ int checkCode(int length) {
     return 1;
 }*/
 
-void addTakeoff(QueueAvion *QueueTakeoff, Avion *avion);
+void addTakeoff(QueueAvion *QueueTakeoff, Cellule_Avion *avion);
 
 void getHourMinuteTime(int t, char *output) {
     // Output a time in the HHMM format from t in minutes.
@@ -80,12 +80,19 @@ void readCode(char *code, QueueAvion *QueueTakeoff, Compagnie *comp, int t) {
         new_plane->heure_decollage = strdup(hour);
         new_plane->compagnie = comp;
 
-        addTakeoff(QueueTakeoff, new_plane);
+        Cellule_Avion *c_avion = (Cellule_Avion *) malloc(sizeof(Cellule_Avion));
+        c_avion->avion = new_plane;
+        c_avion->precedent_compagnie = NULL;
+        c_avion->suivant_compagnie = NULL;
+        c_avion->suivant_attente = NULL;
+
+        addPlaneCompany(comp, c_avion);
+        //addTakeoff(QueueTakeoff, c_avion);
     }
 }
 
 
-void addTakeoff(QueueAvion *QueueTakeoff, Avion *avion) {
+void addTakeoff(QueueAvion *QueueTakeoff, Cellule_Avion *avion) {
     pushQueueArray(QueueTakeoff, avion);
 }
 
@@ -93,22 +100,29 @@ void displayTakeoff(QueueAvion *QueueTakeoff) {
     displayTakeoffQueueArray(QueueTakeoff);
 }
 
+
+
 int main() {
     printf("AIRPORT CONTROL SIMULATOR - WIP\n");
 
     // Loading
-
-
     // Creating the company
     Compagnie *comp = (Compagnie *) malloc(sizeof(Compagnie));
     comp->nom = strdup("AyBiCe");
     comp->acronyme = strdup("ABC");
+    Liste_avion *liste_avions_comp = (Liste_avion *) malloc(sizeof(Liste_avion));
+    comp->avions_compagnie = liste_avions_comp;
+    comp->avions_compagnie->first = NULL;
+    comp->avions_compagnie->last = NULL;
 
 
-    Cellule_compagnie *c_comp = (Cellule_compagnie *) malloc(sizeof(Cellule_compagnie));
-    c_comp->comp = comp;
-    c_comp->suivant = NULL;
-    // UNUSED ATM simple_insertTop(mylist, e1);
+
+    Cellule_compagnie *liste_compagnie = (Cellule_compagnie *) malloc(sizeof(Cellule_compagnie));
+    // liste_compagnie is actually our first company cell
+    liste_compagnie->comp = comp;
+    liste_compagnie->suivant = NULL; // No other company yet
+
+
 
     Avion *avion1 = (Avion *) malloc(sizeof(Avion));
     avion1->identifiant = strdup("ABC001");
@@ -117,6 +131,14 @@ int main() {
     avion1->heure_decollage = strdup("0010");
     avion1->compagnie = comp;
 
+    Cellule_Avion *c_avion1 = (Cellule_Avion *) malloc(sizeof(Cellule_Avion));
+    c_avion1->avion = avion1;
+    c_avion1->precedent_compagnie = NULL;
+    c_avion1->suivant_compagnie = NULL;
+    c_avion1->suivant_attente = NULL;
+
+    addPlaneCompany(comp, c_avion1);
+
     //QueueAvion *q_takeoff = (QueueAvion *) malloc(sizeof(Queue));
 
 
@@ -124,15 +146,33 @@ int main() {
     QueueAvion *QueueTakeoff = (QueueAvion *) malloc(sizeof(QueueAvion));
     initQueueArray(QueueTakeoff, 20);
     // Adding a plane to TakeOff Queue
-    pushQueueArray(QueueTakeoff, avion1);
-    displayTakeoffQueueArray(QueueTakeoff);
+    pushQueueArray(QueueTakeoff, c_avion1);
+
+
+
+    Avion *avion2 = (Avion *) malloc(sizeof(Avion));
+    avion2->identifiant = strdup("ABC004");
+    avion2->carburant = 2000;
+    avion2->consommation = 20; // ATM
+    avion2->heure_decollage = NULL;
+    avion2->compagnie = comp;
+
+    Cellule_Avion *c_avion2 = (Cellule_Avion *) malloc(sizeof(Cellule_Avion));
+    c_avion2->avion = avion2;
+    c_avion2->precedent_compagnie = NULL;
+    c_avion2->suivant_compagnie = NULL;
+    c_avion2->suivant_attente = NULL;
+
 
     // Initializing Landing Queue
-    QueueAvion *QueueLanding = (QueueAvion *) malloc(sizeof(QueueAvion));
-    initQueueArray(QueueLanding, 20);
-    // Adding a plane to TakeOff Queue
-    //pushQueueArray(QueueTakeoff, avion1);
-    //displayTakeoffQueueArray(QueueTakeoff);
+    ListeLanding *ListLanding = (ListeLanding *) malloc(sizeof(ListeLanding));
+    ListLanding->first=NULL;
+    addPlaneLanding(ListLanding, c_avion2);
+
+    displayCompanyPlanes(comp);
+    displayTakeoffQueueArray(QueueTakeoff);
+    displayLanding(ListLanding);
+
 
     char formatted_time[] = "0000";
 
@@ -141,22 +181,22 @@ int main() {
         getHourMinuteTime(t, formatted_time);
         // printf("[DEBUG] %d / %s\n", t, formatted_time);
 
-        Avion *avion_tmp = (Avion *) malloc(sizeof(Avion));
+        Cellule_Avion *c_avion_tmp = (Cellule_Avion *) malloc(sizeof(Cellule_Avion));
         if (!isEmpty(QueueTakeoff)) {
-            getQueueArray(QueueTakeoff, avion_tmp);
+            getQueueArray(QueueTakeoff, c_avion_tmp);
             int next_takeoff_t = -1;
-            next_takeoff_t = getMinuteTime(avion_tmp->heure_decollage);
-            //      printf("[DEBUG] Next takeoff: %d / %s\n", next_takeoff_t, avion_tmp->heure_decollage);
+            next_takeoff_t = getMinuteTime(c_avion_tmp->avion->heure_decollage);
+            //      printf("[DEBUG] Next takeoff: %d / %s\n", next_takeoff_t, c_avion_tmp->heure_decollage);
             if (t >= next_takeoff_t) {
                 if (delQueueArray(QueueTakeoff)) {
-                    printf("[%04d] Takeoff %s\n", t, avion_tmp->identifiant);
+                    printf("[%04d] Takeoff %s\n", t, c_avion_tmp->avion->identifiant);
                 }
                 if (!isEmpty(QueueTakeoff)) {
                     displayTakeoff(QueueTakeoff);
                 } else
                     printf("[%04d] No planes in Takeoff Queue\n", t);
             } else {
-                //printf("[%04d] No Takeoff, next takeoff: %s\n", t, avion_tmp->heure_decollage);
+                //printf("[%04d] No Takeoff, next takeoff: %s\n", t, c_avion_tmp->heure_decollage);
             }
         }
 

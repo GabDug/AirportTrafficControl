@@ -1,7 +1,3 @@
-//
-// Created by Gabriel DUGNY
-//
-
 #ifndef C_QUEUEARRAY_H
 #define C_QUEUEARRAY_H
 
@@ -11,14 +7,11 @@
 #include "struct.h"
 
 typedef struct {
-    Avion *plane;
+    Cellule_Avion *plane;
     int size;
     int in;
     int out;
 }QueueAvion;
-
-
-
 
 
 int isEmpty(QueueAvion *qu);

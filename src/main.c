@@ -20,7 +20,7 @@ int read_code(char *code, QueueAvion *takeoff_queue, ListeLanding *landing_list,
             hour[i] = code[i + 9];
         }
         hour[4] = '\0';
-        
+
         if (get_minute_time(hour) < t + DELAY) {
             printf("[%04d] => Can't add a plane to takeoff in less than five minutes!\n", t);
             return FALSE;
@@ -66,7 +66,7 @@ int read_code(char *code, QueueAvion *takeoff_queue, ListeLanding *landing_list,
 
         Avion *new_plane = (Avion *) malloc(sizeof(Avion));
         new_plane->identifiant = strdup(id);
-        new_plane->carburant = (int) atoi(fuel);
+        new_plane->carburant = atoi(fuel);
         new_plane->consommation = (int) 1;
         new_plane->heure_decollage = NULL;
         new_plane->compagnie = comp;
@@ -162,7 +162,6 @@ int main() {
            "         Formatted codes to add planes\n"
            "         Enter to skip\n");
     printf("[0000] Beginning the simulation:\n");
-
 
 
     char f_t[] = "0000";

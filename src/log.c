@@ -27,10 +27,9 @@ void Log(char *f_t, char *plane_code, char operation, int fuel, int consumption)
         char output[20];
         if (fuel == NULL || consumption == NULL) {
             snprintf(output, sizeof(output), "%6s-%c-%4s-----\n", plane_code, operation, f_t);
-        } else if (fuel != NULL && consumption != NULL) {
-            snprintf(output, sizeof(output), "%6s-%c-%4s-%02d-%02d\n", plane_code, operation, f_t, fuel, consumption);
         } else
-            printf("ERROR LOGGING");
+            snprintf(output, sizeof(output), "%6s-%c-%4s-%02d-%02d\n", plane_code, operation, f_t, fuel, consumption);
+
 
         fputs(output, file);
         fclose(file);
